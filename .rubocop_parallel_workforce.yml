@@ -1,0 +1,365 @@
+require:
+  - rubocop-rspec
+
+AllCops:
+  Exclude:
+    - 'bin/bundle'
+    - 'Gemfile'
+    - 'tmp/**/*'
+  TargetRubyVersion: 2.3
+  UseCache: true
+  CacheRootDirectory: 'tmp'
+
+# default 15
+Metrics/AbcSize:
+  Max: 20
+
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+Lint/ShadowingOuterLocalVariable:
+  Enabled: false
+
+Lint/RescueException:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 128
+
+# clarity over performance for now
+Performance/RedundantBlockCall:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/DescribedClass:
+  Enabled: false
+
+# RSpec/VerifiedDoubles:
+#   Enabled: true
+
+Layout/AlignHash:
+  Enabled: false
+
+Layout/AlignParameters:
+  Enabled: false
+
+Layout/RescueEnsureAlignment:
+  Enabled: false
+
+Style/BarePercentLiterals:
+  EnforcedStyle: percent_q
+
+# would require do/end for multiline blocks
+Style/BlockDelimiters:
+  Enabled: false
+
+Layout/CaseIndentation:
+  EnforcedStyle: case
+
+# disabled because it mostly mashed attr_reader methods up against the first method of a class
+Layout/EmptyLinesAroundArguments:
+  Enabled: false
+
+# explicit decision from team months ago to allow either indentation style
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+
+# good standard, but cop also prevents common 2 line ternary statements
+Style/MultilineTernaryOperator:
+  Enabled: false
+
+Style/NegatedIf:
+  Enabled: false
+
+Layout/SpaceInLambdaLiteral:
+  Enabled: true
+  EnforcedStyle: require_space
+
+Layout/TrailingBlankLines:
+  EnforcedStyle: final_newline
+
+Style/CollectionMethods:
+  PreferredMethods:
+    collect: 'map'
+    collect!: 'map!'
+    reduce: 'inject'
+    find: 'detect'
+
+Style/SingleLineMethods:
+  Enabled: false
+
+Metrics/ClassLength:
+  Max: 100
+
+# default 10
+Metrics/MethodLength:
+  Max: 17
+
+Metrics/ModuleLength:
+  Exclude:
+    - 'spec/**/*'
+
+Security/MarshalLoad:
+  Enabled: false
+
+RSpec/FilePath:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Layout/DotPosition:
+  EnforcedStyle: leading
+
+Style/DoubleNegation:
+  Enabled: false
+
+Layout/EmptyLines:
+  Enabled: false
+
+Layout/EmptyLinesAroundClassBody:
+  Enabled: false
+
+Layout/EmptyLinesAroundModuleBody:
+  Enabled: false
+
+Style/GuardClause:
+  Enabled: false
+
+# disabled per group consensus
+Style/IfUnlessModifier:
+  Enabled: false
+
+Layout/IndentArray:
+  EnforcedStyle: consistent
+
+Layout/MultilineOperationIndentation:
+  Enabled: true
+  EnforcedStyle: indented
+
+Style/NumericLiterals:
+  Enabled: false
+
+# Consider enabling - kwargs are often the better option
+Style/OptionHash:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  Enabled: false
+
+Style/Alias:
+  EnforcedStyle: prefer_alias_method
+
+Style/RaiseArgs:
+  EnforcedStyle: compact
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/SingleLineBlockParams:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: false
+
+Layout/SpaceAroundEqualsInParameterDefault:
+  EnforcedStyle: no_space
+
+Style/TrailingCommaInArguments:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArrayLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
+
+Style/TrivialAccessors:
+  Enabled: false
+
+# both cases where we used %Q were cleaner to read
+Style/UnneededPercentQ:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Style/FormatString:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Exclude:
+    - 'spec/**/*'
+
+# The following cops are added between 0.37.0 and 0.59.2.
+# The configurations are default.
+# If you want to use a cop by default, remove a configuration for the cop from here.
+# If you want to disable a cop, change `Enabled` to false.
+
+# still evaluating
+Lint/NumberConversion:
+  Description: Checks unsafe usage of number conversion methods.
+  Enabled: true
+
+# still evaluating
+Metrics/BlockLength:
+  Description: Avoid long blocks with many lines.
+  Enabled: true
+  CountComments: false
+  Max: 25
+  ExcludedMethods:
+    - refine
+  Exclude:
+    - spec/**/*
+
+# turning off intentionally
+Naming/HeredocDelimiterNaming:
+  Description: Use descriptive heredoc delimiters.
+  StyleGuide: '#heredoc-delimiters'
+  Enabled: false
+  Blacklist:
+    - !ruby/regexp /(^|\s)(EO[A-Z]{1}|END)(\s|$)/
+
+# to evaluate - theorized churn with low value
+Naming/MemoizedInstanceVariableName:
+  Description: Memoized method name should match memo instance variable name.
+  Enabled: true
+  EnforcedStyleForLeadingUnderscores: disallowed
+  SupportedStylesForLeadingUnderscores:
+    - disallowed
+    - required
+    - optional
+
+# Drop this if we hit a bunch of violations
+Naming/UncommunicativeBlockParamName:
+  Description:
+    Checks for block parameter names that contain capital letters, end in
+    numbers, or do not meet a minimal length.
+  Enabled: true
+  MinNameLength: 1
+  AllowNamesEndingInNumbers: true
+  AllowedNames: []
+  ForbiddenNames: []
+
+# intentionally disabled
+Naming/VariableNumber:
+  Description: Use the configured style when numbering variables.
+  Enabled: false
+  EnforcedStyle: normalcase
+  SupportedStyles:
+    - snake_case
+    - normalcase
+    - non_integer
+
+# intentionally disabled
+Performance/UnfreezeString:
+  Description: Use unary plus to get an unfrozen string literal.
+  Enabled: false
+
+# Supports --auto-correct
+# Style customized to expanded
+Style/EmptyMethod:
+  Description: Checks the formatting of empty method definitions.
+  StyleGuide: '#no-single-line-methods'
+  Enabled: true
+  EnforcedStyle: expanded
+  SupportedStyles:
+    - compact
+    - expanded
+
+# revisit in future if upgrading to Ruby 3.0+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle.
+# SupportedStyles: when_needed, always, never
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+# Consider enabling (will cause a lot of churn)
+Style/ImplicitRuntimeError:
+  Description:
+    Use `raise` or `fail` with an explicit exception class and message, rather
+    than just a message.
+  Enabled: false
+
+# Supports --auto-correct
+# Intentionally disabled (we don't care how you do this)
+Style/NumericPredicate:
+  Description: Checks for the use of predicate- or comparison methods for numeric comparisons.
+  StyleGuide: '#predicate-methods'
+  AutoCorrect: false
+  Enabled: false
+  EnforcedStyle: predicate
+  SupportedStyles:
+    - predicate
+    - comparison
+  IgnoredMethods: []
+
+# Supports --auto-correct
+# Set to implicit style
+Style/RescueStandardError:
+  Description: Avoid rescuing without specifying an error class.
+  Enabled: true
+  EnforcedStyle: implicit
+  SupportedStyles:
+    - implicit
+    - explicit
+
+# Supports --auto-correct
+# Enabled, set to return nil implicitly
+Style/ReturnNil:
+  Description: Use return instead of return nil.
+  Enabled: true
+  EnforcedStyle: return
+  SupportedStyles:
+    - return
+    - return_nil
+
+# Supports --auto-correct
+# Set to require_parentheses_when_complex
+Style/TernaryParentheses:
+  Description: Checks for use of parentheses around ternary conditions.
+  Enabled: true
+  EnforcedStyle: require_parentheses_when_complex
+  SupportedStyles:
+    - require_parentheses
+    - require_no_parentheses
+    - require_parentheses_when_complex
+  AllowSafeAssignment: true
+
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, MinSize.
+# SupportedStyles: percent, brackets
+Style/SymbolArray:
+  Enabled: true
+  MinSize: 8
+
+# Cop supports --auto-correct.
+RSpec/LeadingSubject:
+  Enabled: false
+
+RSpec/LetSetup:
+  Enabled: false
+
+# Configuration parameters: AggregateFailuresByDefault.
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/NamedSubject:
+  Enabled: false
+
+RSpec/InstanceVariable:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/ExpectInHook:
+  Enabled: false
+
+RSpec/MessageSpies:
+  Enabled: false
