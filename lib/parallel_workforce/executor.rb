@@ -8,23 +8,23 @@ module ParallelWorkforce
       :actor_args_array,
       :execute_serially,
       :job_class,
+      :execution_block,
     )
 
     # +actor_classes+: a single class or array of classes that can be instantiated with no args and have a `perform` method.
     # If an array is passed, the array size must batch the actor_args_array size.
     # Return results array with element from each actor in the order of the actor_args_array
-    def initialize(actor_classes:, actor_args_array:, execute_serially: nil, job_class: nil)
+    def initialize(actor_classes:, actor_args_array:, execute_serially: nil, job_class: nil, execution_block: nil)
       @actor_classes = normalize_actor_classes!(actor_classes, actor_args_array)
       @actor_args_array = actor_args_array
       @execute_serially = execute_serially.nil? ?
         ParallelWorkforce.configuration.serial_mode_checker&.execute_serially? :
         execute_serially
       @job_class = job_class || ParallelWorkforce.configuration.job_class
+      @execution_block = execution_block
     end
 
     def perform_all
-      return [] if actor_args_array.empty?
-
       if execute_serially
         execute_actors_serially(actor_classes, actor_args_array)
       else
@@ -69,6 +69,8 @@ module ParallelWorkforce
         redis.expire(result_key, ParallelWorkforce.configuration.job_key_expiration)
       end
 
+      execution_block&.call
+
       # concat results from enqueued actors
       result.concat(wait_for_actor_results(result_key, actor_classes, actor_args_array))
 
@@ -80,6 +82,8 @@ module ParallelWorkforce
     end
 
     def execute_actors_serially(actor_classes, actor_args_array)
+      execution_block&.call
+
       actor_classes.zip(actor_args_array).collect do |actor_class, actor_args|
         execute_actor_serially(actor_class, actor_args)
       end

@@ -77,6 +77,7 @@ module ParallelWorkforce
     let(:redis) { Redis.new }
     let(:configuration) { ParallelWorkforce.configuration }
     let(:job_class) { configuration.job_class }
+    let(:execution_block) { nil }
 
     before do
       ParallelWorkforce.configure do |configuration|
@@ -107,6 +108,7 @@ module ParallelWorkforce
           actor_args_array: actor_args_array,
           execute_serially: execute_serially_parameter,
           job_class: job_class,
+          execution_block: execution_block,
         ).perform_all
       end
 
@@ -143,6 +145,16 @@ module ParallelWorkforce
 
         it "sums args" do
           expect(subject).to eq(sum_array)
+        end
+
+        context 'with execution block' do
+          let(:execution_block) { proc { @execution_block_value = true } }
+
+          it 'evaluates execution block' do
+            subject
+
+            expect(@execution_block_value).to eq(true)
+          end
         end
 
         context 'with no logger' do
@@ -203,6 +215,16 @@ module ParallelWorkforce
 
           it "sums args" do
             expect(subject).to eq(sum_array)
+          end
+
+          context 'with execution block' do
+            let(:execution_block) { proc { @execution_block_value = true } }
+
+            it 'evaluates execution block' do
+              subject
+
+              expect(@execution_block_value).to eq(true)
+            end
           end
         end
 
