@@ -9,6 +9,7 @@ module ParallelWorkforce
       :redis_connector,
       :job_timeout,
       :job_key_expiration,
+      :production_environment,
     )
 
     def initialize
@@ -20,6 +21,7 @@ module ParallelWorkforce
       @redis_connector = ParallelWorkforce::RedisConnector::RedisPool.new
       @job_timeout = 10
       @job_key_expiration = 20
+      @production_environment = defined?(Rails) ? Rails.env.production? : true
     end
   end
 end

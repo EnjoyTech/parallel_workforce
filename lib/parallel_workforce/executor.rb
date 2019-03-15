@@ -43,6 +43,8 @@ module ParallelWorkforce
     end
 
     def serialize_and_deserialize(object)
+      return object if ParallelWorkforce.configuration.production_environment
+
       deserialize(serialize(object))
     end
 
