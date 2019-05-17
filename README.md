@@ -93,6 +93,7 @@ end
 * `job_timeout` - Time allowed to execte a job before timing out. Default is `10` seconds.
 * `job_key_expiration` - Time allowed for result key in Redis to remain before it expires. This should be larger than `job_timeout`. Default is `20` seconds.
 * `production_environment` - Removes serialization/deserialization when executing serially that helps locate problems with objects that fail to serialize. When `Rails` is loaded, uses `Rails.env.production?`, otherwise `true`.
+* `allow_nested_parallelization` - By default, executing `ParallelWorkforce.perform_all` within a ParallelWorkforce `Actor` will execute serially. This can be enabled to allow nesting worker invocations, but ensure that the worker pool is large enough to handle blocked workers waiting for a response. Too small of a pool will lead to timeouts as no workers will be available.
 
 ## Development
 

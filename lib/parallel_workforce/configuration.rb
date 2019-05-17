@@ -10,6 +10,7 @@ module ParallelWorkforce
       :job_timeout,
       :job_key_expiration,
       :production_environment,
+      :allow_nested_parallelization,
     )
 
     def initialize
@@ -22,6 +23,7 @@ module ParallelWorkforce
       @job_timeout = 10
       @job_key_expiration = 20
       @production_environment = defined?(Rails) ? Rails.env.production? : true
+      @allow_nested_parallelization = false
     end
   end
 end

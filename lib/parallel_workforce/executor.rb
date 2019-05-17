@@ -17,10 +17,8 @@ module ParallelWorkforce
     def initialize(actor_classes:, actor_args_array:, execute_serially: nil, job_class: nil, execution_block: nil)
       @actor_classes = normalize_actor_classes!(actor_classes, actor_args_array)
       @actor_args_array = actor_args_array
-      @execute_serially = execute_serially.nil? ?
-        ParallelWorkforce.configuration.serial_mode_checker&.execute_serially? :
-        execute_serially
-      @job_class = job_class || ParallelWorkforce.configuration.job_class
+      @execute_serially = execute_serially.nil? ? calculate_execute_serially : execute_serially
+      @job_class = job_class || configuration.job_class
       @execution_block = execution_block
     end
 
@@ -34,16 +32,28 @@ module ParallelWorkforce
 
     private
 
+    def configuration
+      ParallelWorkforce.configuration
+    end
+
+    def calculate_execute_serially
+      if ParallelWorkforce::Job::Util::Performer.parallel_workforce_thread? && !configuration.allow_nested_parallelization
+        return true
+      end
+
+      configuration.serial_mode_checker&.execute_serially?
+    end
+
     def serialize(object)
-      ParallelWorkforce.configuration.serializer.serialize(object)
+      configuration.serializer.serialize(object)
     end
 
     def deserialize(string)
-      ParallelWorkforce.configuration.serializer.deserialize(string)
+      configuration.serializer.deserialize(string)
     end
 
     def serialize_and_deserialize(object)
-      return object if ParallelWorkforce.configuration.production_environment
+      return object if configuration.production_environment
 
       deserialize(serialize(object))
     end
@@ -67,8 +77,8 @@ module ParallelWorkforce
         enqueue_actor(actor_class, actor_args, index, result_key)
       end
 
-      ParallelWorkforce.configuration.redis_connector.with do |redis|
-        redis.expire(result_key, ParallelWorkforce.configuration.job_key_expiration)
+      configuration.redis_connector.with do |redis|
+        redis.expire(result_key, configuration.job_key_expiration)
       end
 
       execution_block&.call
@@ -78,7 +88,7 @@ module ParallelWorkforce
 
       result
     ensure
-      ParallelWorkforce.configuration.redis_connector.with do |redis|
+      configuration.redis_connector.with do |redis|
         redis.del(result_key) if result_key
       end
     end
@@ -106,7 +116,7 @@ module ParallelWorkforce
         actor_class_name: actor_class.name,
         result_key: result_key,
         index: index,
-        server_revision:  ParallelWorkforce.configuration.revision_builder&.revision,
+        server_revision:  configuration.revision_builder&.revision,
         serialized_actor_args: serialize(actor_args),
       )
     end
@@ -119,11 +129,11 @@ module ParallelWorkforce
       result_values = Array.new(num_results)
       result_count = 0
 
-      ParallelWorkforce.configuration.redis_connector.with do |redis|
+      configuration.redis_connector.with do |redis|
         begin
-          Timeout.timeout(ParallelWorkforce.configuration.job_timeout) do
+          Timeout.timeout(configuration.job_timeout) do
             until result_count == num_results
-              _key, response = redis.blpop(result_key, ParallelWorkforce.configuration.job_timeout)
+              _key, response = redis.blpop(result_key, configuration.job_timeout)
               raise ParallelWorkforce::TimeoutError.new("Timeout waiting for Redis#blpop") if response.nil?
 
               result_count += 1

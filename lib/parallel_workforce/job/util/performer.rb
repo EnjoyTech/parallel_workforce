@@ -14,7 +14,11 @@ module ParallelWorkforce
           def perform(actor_class, actor_args)
             actor_args = actor_args.each_with_object({}) { |(k, v), result| result[k.to_sym] = v }
 
-            actor_class.new(**actor_args).perform
+            (actor_args.empty? ? actor_class.new : actor_class.new(**actor_args)).perform
+          end
+
+          def parallel_workforce_thread?
+            !!Thread.current[:parallel_workforce_thread]
           end
         end
 
@@ -68,7 +72,18 @@ module ParallelWorkforce
             raise ParallelWorkforce::SerializerError.new("Unable to locate actor class: #{actor_class_name}")
           end
 
-          self.class.perform(actor_class, deserialize(serialized_actor_args))
+          in_parallel_workforce_thread do
+            self.class.perform(actor_class, deserialize(serialized_actor_args))
+          end
+        end
+
+        def in_parallel_workforce_thread(&block)
+          original_parallel_workforce_thread = Thread.current[:parallel_workforce_thread]
+
+          Thread.current[:parallel_workforce_thread] = true
+          yield
+        ensure
+          Thread.current[:parallel_workforce_thread] = original_parallel_workforce_thread
         end
 
         def serialize(object)

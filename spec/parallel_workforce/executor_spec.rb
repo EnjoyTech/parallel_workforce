@@ -30,8 +30,10 @@ module ParallelWorkforce
     end
 
     let(:server_revision) { "revision-#{rand}" }
+    let(:allow_nested_parallelization) { nil }
     let(:execute_serially_parameter) { nil }
     let(:execute_serially_checker) { nil }
+    let(:expect_serial_execution) { false }
     let(:serial_mode_checker) { nil }
     let(:uuid) { "uuid-#{rand(0..1000000)}" }
     let(:result_key) { "#{described_class}:result_key:#{uuid}" }
@@ -88,6 +90,7 @@ module ParallelWorkforce
         configuration.serial_mode_checker = serial_mode_checker
         configuration.serializer = serializer
         configuration.job_class = TestJob
+        configuration.allow_nested_parallelization = allow_nested_parallelization
       end
     end
 
@@ -121,7 +124,7 @@ module ParallelWorkforce
 
         before do
           blpop_results.each.with_index do |blpop_result, index|
-            unless execute_serially_parameter || execute_serially_checker
+            unless expect_serial_execution
               expect(redis).to receive(:blpop).with(
                 result_key, job_timeout
               ).and_return([result_key, blpop_result])
@@ -189,6 +192,7 @@ module ParallelWorkforce
 
         context "with serial execution parameter true" do
           let(:execute_serially_parameter) { true }
+          let(:expect_serial_execution) { true }
 
           it "sums args" do
             expect(subject).to eq(sum_array)
@@ -203,6 +207,30 @@ module ParallelWorkforce
           end
         end
 
+        context "when in parallel_workforce_thread" do
+          before do
+            allow(ParallelWorkforce::Job::Util::Performer).to receive(:parallel_workforce_thread?).and_return(true)
+          end
+
+          context 'with allow_nested_parallelization true' do
+            let(:allow_nested_parallelization) { true }
+            let(:expect_serial_execution) { false }
+
+            it "sums args in parallel" do
+              expect(subject).to eq(sum_array)
+            end
+          end
+
+          context 'with allow_nested_parallelization false' do
+            let(:allow_nested_parallelization) { false }
+            let(:expect_serial_execution) { true }
+
+            it "sums args serially" do
+              expect(subject).to eq(sum_array)
+            end
+          end
+        end
+
         context "with serial execution checker true" do
           let(:serial_mode_checker) do
             Struct.new(:execute_serially) do
@@ -212,6 +240,7 @@ module ParallelWorkforce
             end.new(execute_serially_checker)
           end
           let(:execute_serially_checker) { true }
+          let(:expect_serial_execution) { true }
 
           it "sums args" do
             expect(subject).to eq(sum_array)

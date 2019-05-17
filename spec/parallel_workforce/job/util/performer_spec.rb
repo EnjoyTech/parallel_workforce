@@ -52,6 +52,20 @@ module ParallelWorkforce::Job::Util
         expect(subject).to eq(serialized_value: serialize(value + 1))
       end
 
+      context 'with parallel_workforce_thread' do
+        class ParallelWorkforceThreadActor
+          def perform
+            Thread.current[:parallel_workforce_thread]
+          end
+        end
+        let(:actor_class_name) { ParallelWorkforceThreadActor.name }
+        let(:actor_args) { {} }
+
+        it "sets parallel_workforce_thread thread local variable to true" do
+          expect(subject).to eq(serialized_value: serialize(true))
+        end
+      end
+
       context 'with different server revision' do
         let(:server_revision) { "different_revision" }
 
