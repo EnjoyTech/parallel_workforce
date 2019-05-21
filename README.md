@@ -30,6 +30,10 @@ Parallel execution requires two things:
 
   Optional arguments for `execute_serially` and `job_class` can be used with `perform_all` to override configuration settings.
 
+  An optional `serial_execution_indexes` can also be used to execute specific indexes serially. This is useful to easily
+  perform "fast" actors in the current thread and only sending "slow" actors to be executed in workers. The specified serial
+  actors are performed after enqueuing the remaining actors and waiting for them to complete.
+
   Additionally, a block can be passed to `perform_all` that allows arbitrary
   execution in the current thread after the jobs have been enqueued and before checking for job responses.
 

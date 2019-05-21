@@ -34,6 +34,7 @@ module ParallelWorkforce
     let(:execute_serially_parameter) { nil }
     let(:execute_serially_checker) { nil }
     let(:expect_serial_execution) { false }
+    let(:serial_execution_indexes) { nil }
     let(:serial_mode_checker) { nil }
     let(:uuid) { "uuid-#{rand(0..1000000)}" }
     let(:result_key) { "#{described_class}:result_key:#{uuid}" }
@@ -109,6 +110,7 @@ module ParallelWorkforce
         described_class.new(
           actor_classes: actor_class,
           actor_args_array: actor_args_array,
+          serial_execution_indexes: serial_execution_indexes,
           execute_serially: execute_serially_parameter,
           job_class: job_class,
           execution_block: execution_block,
@@ -117,7 +119,9 @@ module ParallelWorkforce
 
       context "with enqueued actor args" do
         let(:blpop_results) do
-          actor_args_array.map.with_index do |actor_args, index|
+          (actor_args_array.reject.with_index do |actor_args, index|
+            index.in?(Array.wrap(serial_execution_indexes))
+          end).map.with_index do |actor_args, index|
             Marshal.dump(index: index, serialized_value: serialize(actor_args.values.inject(:+)))
           end
         end
@@ -187,6 +191,33 @@ module ParallelWorkforce
             subject
 
             expect(subject).to eq(sum_array)
+          end
+        end
+
+        context 'with serial_execution_indexes specified' do
+          context 'with invalid index' do
+            let(:serial_execution_indexes) { [actor_args_array.length] }
+            let(:blpop_results) { [] }
+
+            it 'raises argument error' do
+              expect { subject }.to raise_error(ArgumentError)
+            end
+          end
+
+          {
+            no_indexes: [],
+            first_index: [0],
+            last_index: [1],
+            all_indexes: [0, 1],
+            reverse_order_indexes: [1, 0],
+          }.each do |name, indexes|
+            context "with valid #{name}" do
+              let(:serial_execution_indexes) { indexes }
+
+              it "sums args both in parallel and serially" do
+                expect(subject).to eq(sum_array)
+              end
+            end
           end
         end
 

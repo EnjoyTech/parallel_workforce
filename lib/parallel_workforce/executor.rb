@@ -7,6 +7,7 @@ module ParallelWorkforce
       :actor_classes,
       :actor_args_array,
       :execute_serially,
+      :serial_execution_indexes,
       :job_class,
       :execution_block,
     )
@@ -14,23 +15,72 @@ module ParallelWorkforce
     # +actor_classes+: a single class or array of classes that can be instantiated with no args and have a `perform` method.
     # If an array is passed, the array size must batch the actor_args_array size.
     # Return results array with element from each actor in the order of the actor_args_array
-    def initialize(actor_classes:, actor_args_array:, execute_serially: nil, job_class: nil, execution_block: nil)
+    # rubocop:disable Metrics/ParameterLists
+    def initialize(actor_classes:, actor_args_array:,
+        serial_execution_indexes: nil, execute_serially: nil, job_class: nil, execution_block: nil)
       @actor_classes = normalize_actor_classes!(actor_classes, actor_args_array)
       @actor_args_array = actor_args_array
+      @serial_execution_indexes = serial_execution_indexes
       @execute_serially = execute_serially.nil? ? calculate_execute_serially : execute_serially
       @job_class = job_class || configuration.job_class
       @execution_block = execution_block
     end
+    # rubocop:enable Metrics/ParameterLists
 
     def perform_all
-      if execute_serially
-        execute_actors_serially(actor_classes, actor_args_array)
-      else
-        execute_actors_parallel(actor_classes, actor_args_array)
+      serial_execution_indexes = calculate_serial_execution_indexes
+      serial_actor_classes, serial_actor_args_array, parallel_actor_classes, parallel_actor_args_array =
+        split_serial_parallel(serial_execution_indexes, actor_classes, actor_args_array)
+
+      serial_results = nil
+      parallel_results = execute_actors(parallel_actor_classes, parallel_actor_args_array) do
+        serial_results = serial_actor_classes.zip(serial_actor_args_array).collect do |actor_class, actor_args|
+          execute_actor_serially(actor_class, actor_args)
+        end
+      end
+
+      Array.new(actor_args_array.length) do |index|
+        if index == serial_execution_indexes.first
+          serial_execution_indexes.shift
+          serial_results.shift
+        else
+          parallel_results.shift
+        end
       end
     end
 
     private
+
+    def split_serial_parallel(serial_execution_indexes, actor_classes, actor_args_array)
+      serial_execution_indexes = serial_execution_indexes.dup
+
+      [[], [], [], []].tap do |result|
+        actor_classes.zip(actor_args_array).each_with_index do |(actor_class, actor_args), index|
+          if index == serial_execution_indexes.first
+            serial_execution_indexes.shift
+            result[0] << actor_class
+            result[1] << actor_args
+          else
+            result[2] << actor_class
+            result[3] << actor_args
+          end
+        end
+      end
+    end
+
+    def calculate_serial_execution_indexes
+      if execute_serially
+        actor_args_array.length.times.to_a
+      elsif serial_execution_indexes
+        serial_execution_indexes.sort.each do |index|
+          if index < 0 || index >= actor_args_array.size
+            raise ArgumentError.new("serial_execution_indexes must be between 0 and #{actor_args_array.size}")
+          end
+        end
+      else
+        []
+      end
+    end
 
     def configuration
       ParallelWorkforce.configuration
@@ -68,7 +118,8 @@ module ParallelWorkforce
       actor_classes
     end
 
-    def execute_actors_parallel(actor_classes, actor_args_array)
+    # rubocop:disable Metrics/AbcSize
+    def execute_actors(actor_classes, actor_args_array, &execute_actors_serially_proc)
       result_key = "ParallelWorkforce::Executor:result_key:#{SecureRandom.uuid}"
 
       result = []
@@ -81,6 +132,8 @@ module ParallelWorkforce
         redis.expire(result_key, configuration.job_key_expiration)
       end
 
+      execute_actors_serially_proc.call
+
       execution_block&.call
 
       # concat results from enqueued actors
@@ -92,14 +145,7 @@ module ParallelWorkforce
         redis.del(result_key) if result_key
       end
     end
-
-    def execute_actors_serially(actor_classes, actor_args_array)
-      execution_block&.call
-
-      actor_classes.zip(actor_args_array).collect do |actor_class, actor_args|
-        execute_actor_serially(actor_class, actor_args)
-      end
-    end
+    # rubocop:enable Metrics/AbcSize
 
     def execute_actor_serially(actor_class, actor_args)
       # Mimic serialization behavior in parallel actor execution
