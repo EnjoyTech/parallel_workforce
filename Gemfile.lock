@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    parallel_workforce (0.2.0)
+    parallel_workforce (1.0.0)
 
 GEM
   remote: https://rubygems.org/
