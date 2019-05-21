@@ -2,7 +2,7 @@
 
 Easily parallelize functionality by partitioning work in either a Sidekiq (preferred) or ActiveJob worker pool.
 
-See more info on [why Enjoy needed this Gem](https://medium.com/enjoy-engineering/ruby-and-rails-can-be-as-fast-as-you-need-if-you-execute-in-parallel-632f2dff5429) at the [EnjoyTech blog](https://medium.com/enjoy-engineering).
+See more info on [why Enjoy created this Gem](https://medium.com/enjoy-engineering/ruby-and-rails-can-be-as-fast-as-you-need-if-you-execute-in-parallel-632f2dff5429) at the [EnjoyTech blog](https://medium.com/enjoy-engineering).
 
 ## Installation
 
