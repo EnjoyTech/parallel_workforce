@@ -18,7 +18,7 @@ module ParallelWorkforce
       @logger = defined?(Rails) && Rails.logger
       @revision_builder = ParallelWorkforce::RevisionBuilder::FilesHash.new
       @serial_mode_checker = nil
-      @serializer = ParallelWorkforce::Serializer::Marshal.new
+      @serializer = ParallelWorkforce::Serializer::Yajl.new
       @redis_connector = ParallelWorkforce::RedisConnector::RedisPool.new
       @job_timeout = 10
       @job_key_expiration = 20

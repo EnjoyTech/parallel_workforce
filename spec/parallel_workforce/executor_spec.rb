@@ -63,13 +63,13 @@ module ParallelWorkforce
       # use a custom serializer for specs
       Class.new do
         def serialize(object)
-          JSON.dump(value: ::Marshal.dump(object))
+          ::Yajl::Encoder.encode(value: ::JSON.dump(object))
         rescue
           raise ParallelWorkforce::SerializerError.new
         end
 
         def deserialize(string)
-          Marshal.load(JSON.parse(string)['value'])
+          ::Yajl::Parser.parse(JSON.parse(string)['value'], {:symbolize_names => true})
         rescue
           raise ParallelWorkforce::SerializerError.new
         end
@@ -230,7 +230,7 @@ module ParallelWorkforce
           end
 
           context "with unserializable actor args array" do
-            let(:actor_args_array) { [Hash.new { 'value' }] } # Hash with default proc can't be with Marshal serializer
+            let(:actor_args_array) { [{a: 0.0/0.0 }] }
 
             it 'raises ParallelWorkforce::SerializerError since actor arguments cannot be serialized' do
               expect { subject }.to raise_error(ParallelWorkforce::SerializerError)

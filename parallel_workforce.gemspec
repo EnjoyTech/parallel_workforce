@@ -44,5 +44,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop", "~> 0.65"
   spec.add_development_dependency "rubocop-rspec", "~> 1.32"
   spec.add_development_dependency "sidekiq", "~> 4.0"
+  spec.add_development_dependency "yajl-ruby", "~> 1.4.1"
 end
 # rubocop:enable Metrics/BlockLength

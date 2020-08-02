@@ -105,8 +105,8 @@ RSpec.configure do |config|
   # frozen_string_literal: true
 
   shared_context 'shared_context_data' do
-    let(:value) { [{ name: 'Prabin', id: 124, args: {}}] } # OK
-    # let(:value) { [{ name: 'Prabin', id: 136, args: {}}] } # ERROR
+    let(:value) { [{ name: 'Prabin', id: 136, args: {}}] } # OK
+    # let(:value) { [{ name: 'Prabin', id: 124, args: {}}] } # OK
     let(:result_key) { 'result_key' }
   end
 

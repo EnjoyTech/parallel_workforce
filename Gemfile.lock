@@ -149,6 +149,7 @@ GEM
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     unicode-display_width (1.4.1)
+    yajl-ruby (1.4.1)
 
 PLATFORMS
   ruby
@@ -164,6 +165,7 @@ DEPENDENCIES
   rubocop (~> 0.65)
   rubocop-rspec (~> 1.32)
   sidekiq (~> 4.0)
+  yajl-ruby (~> 1.4.1)
 
 BUNDLED WITH
    1.17.3
