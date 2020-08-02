@@ -1,3 +1,9 @@
+## 1.1.0
+
+* Add Json, Yajl serializer
+* Make Yajl as default serializer
+* Fixed https://github.com/EnjoyTech/parallel_workforce/issues/1
+ 
 ## 0.2.0
 
 * Add optional execution block to `ParallelWorkforce.perform_all` that is evaluated in calling thread after jobs enqueued,

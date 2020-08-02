@@ -92,7 +92,7 @@ end
 * `logger` - Defaults to `Rails.logger` if `Rails` is loaded.
 * `revision_builder` - Used to determine if the calling thread and worker have a different revision of code. Defaults to a class that builds a hash from the contents of all `.rb` files contained within the current working directory.
 * `serial_mode_checker` - An object with an `execute_serially?` method that allows forcing Actors to execute in calling thread instead of in workers. This can be used to turn off parallel execution globally. Default is `nil`.
-* `serializer` - An object with a `serialize(object)` method that returns a `String` and `deserialize(string)` method that returns an `Object`. Default imlementation uses `Marshal.dump` and `Marshal.load`.
+* `serializer` - An object with a `serialize(object)` method that returns a `String` and `deserialize(string)` method that returns an `Object`. Default imlementation uses `::Yajl::Encoder.encode` and `::Yajl::Parser.parse`.
 * `redis_connector` - An object with a `with` method that yields a Redis connection. Defaults to `ParallelWorkforce::RedisConnector::RedisPool`. If using Sidekiq, it's best to use `ParallelWorkforce::RedisConnector::SidekiqRedisPool`.
 * `job_timeout` - Time allowed to execte a job before timing out. Default is `10` seconds.
 * `job_key_expiration` - Time allowed for result key in Redis to remain before it expires. This should be larger than `job_timeout`. Default is `20` seconds.
