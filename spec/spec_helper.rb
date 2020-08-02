@@ -102,4 +102,11 @@ RSpec.configure do |config|
   # test failures related to randomization by passing the same `--seed` value
   # as the one that triggered the failure.
   Kernel.srand config.seed
+  # frozen_string_literal: true
+
+  shared_context 'shared_context_data' do
+    let(:value) { {id: 124} }
+    let(:result_key) { 'result_key' }
+  end
+
 end

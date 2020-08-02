@@ -2,6 +2,7 @@ require 'spec_helper'
 
 module ParallelWorkforce::Job
   describe Sidekiq do
+    include_context 'shared_context_data'
     class SidekiqTestActor
       def initialize(value:)
         @value = value
@@ -12,11 +13,10 @@ module ParallelWorkforce::Job
       end
     end
 
-    let(:value) { 'a value' }
+
     let(:actor_class) { SidekiqTestActor }
     let(:actor_class_name) { actor_class.name }
     let(:actor) { actor_class.new(value: value) }
-    let(:result_key) { 'result_key' }
     let(:index) { 0 }
     let(:server_revision) { nil }
     let(:serialized_actor_args) { ParallelWorkforce.configuration.serializer.serialize(value: value) }
