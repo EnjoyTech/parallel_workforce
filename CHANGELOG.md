@@ -1,3 +1,6 @@
+## 1.0.1
+* Allow `allow_partial_result` in configuration and while calling any of `ParallelWorkforce.perform_all`;By default false but can make true if partial result needed
+
 ## 0.2.0
 
 * Add optional execution block to `ParallelWorkforce.perform_all` that is evaluated in calling thread after jobs enqueued,

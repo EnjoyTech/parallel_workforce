@@ -9,6 +9,7 @@ module ParallelWorkforce
       :execute_serially,
       :serial_execution_indexes,
       :job_class,
+      :allow_partial_result,
       :execution_block,
     )
 
@@ -17,12 +18,13 @@ module ParallelWorkforce
     # Return results array with element from each actor in the order of the actor_args_array
     # rubocop:disable Metrics/ParameterLists
     def initialize(actor_classes:, actor_args_array:,
-        serial_execution_indexes: nil, execute_serially: nil, job_class: nil, execution_block: nil)
+        serial_execution_indexes: nil, execute_serially: nil, job_class: nil, allow_partial_result: nil, execution_block: nil)
       @actor_classes = normalize_actor_classes!(actor_classes, actor_args_array)
       @actor_args_array = actor_args_array
       @serial_execution_indexes = serial_execution_indexes
       @execute_serially = execute_serially.nil? ? calculate_execute_serially : execute_serially
       @job_class = job_class || configuration.job_class
+      @allow_partial_result = allow_partial_result || configuration.allow_partial_result
       @execution_block = execution_block
     end
     # rubocop:enable Metrics/ParameterLists
@@ -190,7 +192,11 @@ module ParallelWorkforce
             end
           end
         rescue Timeout::Error
-          raise ParallelWorkforce::TimeoutError.new("Timeout from ParallelWorkforce job")
+          if allow_partial_result == true
+            return result_values.reject(&:nil?)
+          else
+            raise ParallelWorkforce::TimeoutError.new("Timeout from ParallelWorkforce job")
+          end
         end
       end
 

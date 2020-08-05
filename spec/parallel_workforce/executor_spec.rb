@@ -31,6 +31,7 @@ module ParallelWorkforce
 
     let(:server_revision) { "revision-#{rand}" }
     let(:allow_nested_parallelization) { nil }
+    let(:allow_partial_result) { nil }
     let(:execute_serially_parameter) { nil }
     let(:execute_serially_checker) { nil }
     let(:expect_serial_execution) { false }
@@ -92,6 +93,7 @@ module ParallelWorkforce
         configuration.serializer = serializer
         configuration.job_class = TestJob
         configuration.allow_nested_parallelization = allow_nested_parallelization
+        configuration.allow_partial_result = allow_partial_result
       end
     end
 
@@ -115,6 +117,31 @@ module ParallelWorkforce
           job_class: job_class,
           execution_block: execution_block,
         ).perform_all
+      end
+
+      context "when Timeout::Error occurred" do
+
+        before do
+          allow(Timeout).to receive(:timeout).and_raise(Timeout::Error)
+        end
+
+        context 'with allow_partial_result true' do
+          let(:allow_partial_result) { true }
+
+          it "will not raise ParallelWorkforce::TimeoutError exception" do
+            expect { subject }.not_to raise_error
+            expect(subject.class).to eq(Array)
+          end
+        end
+
+        context 'with allow_partial_result false' do
+
+          let(:allow_partial_result) { false }
+
+          it "raise ParallelWorkforce::TimeoutError exception " do
+            expect { subject }.to raise_error(an_instance_of(ParallelWorkforce::TimeoutError).and having_attributes(message: "Timeout from ParallelWorkforce job"))
+          end
+        end
       end
 
       context "with enqueued actor args" do

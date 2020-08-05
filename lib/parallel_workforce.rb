@@ -13,13 +13,14 @@ module ParallelWorkforce
     # Return results array with element from each action in the order of the job_args_array
     # rubocop:disable Metrics/ParameterLists
     def perform_all(actor_classes:, actor_args_array:,
-        serial_execution_indexes: nil, execute_serially: nil, job_class: nil, &execution_block)
+        serial_execution_indexes: nil, execute_serially: nil, job_class: nil,allow_partial_result: nil, &execution_block)
       ParallelWorkforce::Executor.new(
         actor_classes: actor_classes,
         actor_args_array: actor_args_array,
         execute_serially: execute_serially,
         serial_execution_indexes: serial_execution_indexes,
         job_class: job_class,
+        allow_partial_result: allow_partial_result,
         execution_block: execution_block,
       ).perform_all
     end

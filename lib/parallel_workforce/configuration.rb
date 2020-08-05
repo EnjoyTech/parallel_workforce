@@ -11,6 +11,7 @@ module ParallelWorkforce
       :job_key_expiration,
       :production_environment,
       :allow_nested_parallelization,
+      :allow_partial_result,
     )
 
     def initialize
@@ -24,6 +25,7 @@ module ParallelWorkforce
       @job_key_expiration = 20
       @production_environment = defined?(Rails) ? Rails.env.production? : true
       @allow_nested_parallelization = false
+      @allow_partial_result = false
     end
   end
 end
