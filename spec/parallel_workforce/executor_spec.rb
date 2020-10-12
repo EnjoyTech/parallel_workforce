@@ -81,6 +81,7 @@ module ParallelWorkforce
     let(:configuration) { ParallelWorkforce.configuration }
     let(:job_class) { configuration.job_class }
     let(:execution_block) { nil }
+    let(:blpop_value) { Marshal.dump(index: 0, serialized_value: serialize('invalid')) }
 
     before do
       ParallelWorkforce.configure do |configuration|
@@ -97,7 +98,7 @@ module ParallelWorkforce
 
     describe '.perform_all' do
       before do
-        allow(redis).to receive(:blpop).and_return([result_key, Marshal.dump(index: 0, serialized_value: serialize('invalid'))])
+        allow(redis).to receive(:blpop).and_return([result_key, blpop_value])
 
         allow(job_class).to receive(:enqueue_actor)
 
@@ -115,6 +116,30 @@ module ParallelWorkforce
           job_class: job_class,
           execution_block: execution_block,
         ).perform_all
+      end
+
+      context 'with timeout from Timeout' do
+        before do
+          allow(Timeout).to receive(:timeout).with(job_timeout).and_raise(Timeout::Error)
+        end
+
+        it 'raises TimeoutError with result_values' do
+          expect { subject }.to raise_error(an_instance_of(ParallelWorkforce::TimeoutError).and(having_attributes(
+            message: "Timeout from ParallelWorkforce job",
+            result_values: [nil, nil],
+          )))
+        end
+      end
+
+      context 'with timeout from blpop' do
+        let(:blpop_value) { nil }
+
+        it 'raises TimeoutError with result_values' do
+          expect { subject }.to raise_error(an_instance_of(ParallelWorkforce::TimeoutError).and(having_attributes(
+            message: "Timeout waiting for Redis#blpop",
+            result_values: [nil, nil],
+          )))
+        end
       end
 
       context "with enqueued actor args" do

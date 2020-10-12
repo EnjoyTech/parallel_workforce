@@ -4,7 +4,15 @@ module ParallelWorkforce
   Error = Class.new(StandardError)
   ActorPerformError = Class.new(Error)
   ActorNotFoundError = Class.new(Error)
-  TimeoutError = Class.new(Error)
+  TimeoutError = Class.new(Error) do
+    attr_reader :result_values
+
+    def initialize(message, result_values=nil)
+      @result_values = result_values
+
+      super(message)
+    end
+  end
   SerializerError = Class.new(Error)
 
   class << self

@@ -1,6 +1,7 @@
 ## 2.0.0
 
 * Ruby version tested is 2.6.6.
+* Include result_values as part of TimeoutError to allow access to partial results that did not timeout.
 
 ## 1.0.0
 

@@ -180,7 +180,7 @@ module ParallelWorkforce
           Timeout.timeout(configuration.job_timeout) do
             until result_count == num_results
               _key, response = redis.blpop(result_key, configuration.job_timeout)
-              raise ParallelWorkforce::TimeoutError.new("Timeout waiting for Redis#blpop") if response.nil?
+              raise ParallelWorkforce::TimeoutError.new("Timeout waiting for Redis#blpop", result_values) if response.nil?
 
               result_count += 1
 
@@ -190,7 +190,7 @@ module ParallelWorkforce
             end
           end
         rescue Timeout::Error
-          raise ParallelWorkforce::TimeoutError.new("Timeout from ParallelWorkforce job")
+          raise ParallelWorkforce::TimeoutError.new("Timeout from ParallelWorkforce job", result_values)
         end
       end
 
