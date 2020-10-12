@@ -1,3 +1,11 @@
+## 2.0.0
+
+* Ruby version tested is 2.6.6.
+
+## 1.0.0
+
+* RubyGems version 1.
+
 ## 0.2.0
 
 * Add optional execution block to `ParallelWorkforce.perform_all` that is evaluated in calling thread after jobs enqueued,
