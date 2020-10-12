@@ -5,6 +5,7 @@ require_relative "job/util/performer"
 require_relative "redis_connector/redis_pool"
 require_relative "revision_builder/files_hash"
 require_relative "serializer/marshal"
+require_relative "serializer/json_marshal"
 
 # rubocop:disable Lint/HandleExceptions
 begin

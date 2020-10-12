@@ -2,6 +2,7 @@
 
 * Ruby version tested is 2.6.6.
 * Include result_values as part of TimeoutError to allow access to partial results that did not timeout.
+* Default to using JsonMarshal serialization that serializes as a JSON string for Sidekiq compataibility.
 
 ## 1.0.0
 

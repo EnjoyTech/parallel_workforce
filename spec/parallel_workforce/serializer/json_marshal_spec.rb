@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module ParallelWorkforce::Serializer
-  describe Marshal do
+  describe JsonMarshal do
     let(:serializer) { described_class.new }
 
     describe '#serialize' do
@@ -12,7 +12,7 @@ module ParallelWorkforce::Serializer
       end
 
       it 'serializes object' do
-        expect(subject).to eq(::Marshal.dump(object))
+        expect(subject).to eq(JSON.dump('value' => ::Marshal.dump(object)))
       end
 
       context 'with object that cannot be serialized' do
@@ -26,7 +26,7 @@ module ParallelWorkforce::Serializer
 
     describe '#deserialize' do
       let(:value) { 'an object' }
-      let(:string) { ::Marshal.dump(value) }
+      let(:string) { JSON.dump('value' => ::Marshal.dump(value)) }
 
       subject do
         serializer.deserialize(string)
