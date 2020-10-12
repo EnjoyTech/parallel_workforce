@@ -135,7 +135,13 @@ Style/GuardClause:
 Style/IfUnlessModifier:
   Enabled: false
 
-Layout/IndentArray:
+Layout/IndentFirstArgument:
+  Enabled: false
+
+Naming/RescuedExceptionsVariableName:
+  Enabled: false
+
+Layout/IndentFirstArrayElement:
   EnforcedStyle: consistent
 
 Layout/MultilineOperationIndentation:
