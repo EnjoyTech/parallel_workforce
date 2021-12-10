@@ -1,6 +1,6 @@
 module ParallelWorkforce
   module Job
-    class ActiveJob < ActiveJob::Base
+    class ActiveJob < ::ActiveJob::Base
       discard_on Exception if defined?(discard_on)
 
       class << self
