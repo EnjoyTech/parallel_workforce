@@ -3,7 +3,8 @@ module ParallelWorkforce
     class SidekiqRails < ParallelWorkforce::Job::Sidekiq
       class << self
         def enqueue_actor(actor_class_name:, result_key:, index:, server_revision:, serialized_actor_args:)
-          perform_async(
+          enqueue_actor_job(
+            :perform_async,
             actor_class_name: actor_class_name,
             result_key: result_key,
             index: index,

@@ -3,7 +3,8 @@ module ParallelWorkforce
     class ActiveJobRails < ParallelWorkforce::Job::ActiveJob
       class << self
         def enqueue_actor(actor_class_name:, result_key:, index:, server_revision:, serialized_actor_args:)
-          perform_later(
+          enqueue_actor_job(
+            :perform_later,
             actor_class_name: actor_class_name,
             result_key: result_key,
             index: index,

@@ -1,11 +1,14 @@
 module ParallelWorkforce
   module Job
     class ActiveJob < ::ActiveJob::Base
+      include ParallelWorkforce::Job::Util::JobHelper
+
       discard_on Exception if defined?(discard_on)
 
       class << self
         def enqueue_actor(actor_class_name:, result_key:, index:, server_revision:, serialized_actor_args:)
-          perform_later(
+          enqueue_actor_job(
+            :perform_later,
             actor_class_name: actor_class_name,
             result_key: result_key,
             index: index,
