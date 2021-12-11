@@ -103,3 +103,47 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 end
+
+RSpec.shared_examples 'enqueue_actor' do |job_method, time_zone_name=nil|
+  subject do
+    Time.use_zone(time_zone_name) do
+      described_class.enqueue_actor(args)
+    end
+  end
+
+  it 'enqueues job and sets serialize_actor_args' do
+    expect(described_class).to receive(job_method).with(
+      {
+        actor_class_name: actor_class_name,
+        result_key: result_key,
+        index: index,
+        server_revision: server_revision,
+      }.tap do |args|
+        args[:time_zone_name] = time_zone_name if time_zone_name
+      end,
+    )
+
+    subject
+  end
+end
+
+RSpec.shared_examples 'perform' do |job_method, time_zone_name=nil|
+  subject do
+    Time.use_zone(time_zone_name) do
+      # do not allow to actually enqueue job
+      expect(described_class).to receive(job_method)
+
+      described_class.enqueue_actor(args)
+
+      perform_args = args.dup
+      perform_args[:time_zone_name] = time_zone_name if time_zone_name
+      described_class.new.perform(perform_args)
+    end
+  end
+
+  it 'performs actor' do
+    Time.use_zone(time_zone_name) do
+      expect(subject).to eq(serialized_value: ParallelWorkforce.configuration.serializer.serialize(value))
+    end
+  end
+end

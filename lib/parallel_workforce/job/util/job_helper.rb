@@ -7,7 +7,21 @@ module ParallelWorkforce
         end
 
         module ClassMethods
+          def build_serialized_actor_args_key(result_key, index)
+            "#{result_key}:#{index}:serialized-actor-args"
+          end
+
           def enqueue_actor_job(enqueue_method, **kwargs)
+            serialized_actor_args = kwargs.delete(:serialized_actor_args)
+
+            ::ParallelWorkforce.configuration.redis_connector.with do |redis|
+              redis.setex(
+                build_serialized_actor_args_key(kwargs[:result_key], kwargs[:index]),
+                ::ParallelWorkforce.configuration.job_key_expiration,
+                serialized_actor_args,
+              )
+            end
+
             send(
               enqueue_method,
               **kwargs,
@@ -17,6 +31,16 @@ module ParallelWorkforce
 
         def invoke_performer(args)
           args.transform_keys!(&:to_sym)
+
+          serialized_actor_args = ParallelWorkforce.configuration.redis_connector.with do |redis|
+            serialized_actor_args_key = self.class.build_serialized_actor_args_key(args[:result_key], args[:index])
+
+            redis.getset(serialized_actor_args_key, nil).tap do
+              redis.del(serialized_actor_args_key)
+            end
+          end
+
+          args[:serialized_actor_args] = serialized_actor_args
 
           ParallelWorkforce::Job::Util::Performer.new(**args).perform
         end
