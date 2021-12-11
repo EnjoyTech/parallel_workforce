@@ -16,10 +16,7 @@ module ParallelWorkforce
       end
 
       def perform(args)
-        args.symbolize_keys!
-        Time.use_zone(args.delete(:time_zone_name)) do
-          ParallelWorkforce::Job::Util::Performer.new(**args).perform
-        end
+        invoke_performer_with_time_zone_name(args)
       end
     end
   end

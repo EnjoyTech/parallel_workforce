@@ -20,8 +20,7 @@ module ParallelWorkforce
       end
 
       def perform(args)
-        args = args.each_with_object({}) { |(k, v), result| result[k.to_sym] = v }
-        ParallelWorkforce::Job::Util::Performer.new(**args).perform
+        invoke_performer(args)
       end
     end
   end

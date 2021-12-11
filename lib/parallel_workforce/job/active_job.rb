@@ -19,7 +19,7 @@ module ParallelWorkforce
       end
 
       def perform(args)
-        ParallelWorkforce::Job::Util::Performer.new(**args.symbolize_keys).perform
+        invoke_performer(args)
       end
     end
   end
