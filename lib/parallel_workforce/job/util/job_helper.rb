@@ -40,6 +40,8 @@ module ParallelWorkforce
             end
           end
 
+          raise "Unable to locate serialized data required for Performer" if serialized_actor_args.nil?
+
           args[:serialized_actor_args] = serialized_actor_args
 
           ParallelWorkforce::Job::Util::Performer.new(**args).perform
