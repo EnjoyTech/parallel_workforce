@@ -3,7 +3,8 @@ module ParallelWorkforce
     class SidekiqRails < ParallelWorkforce::Job::Sidekiq
       class << self
         def enqueue_actor(actor_class_name:, result_key:, index:, server_revision:, serialized_actor_args:)
-          perform_async(
+          enqueue_actor_job(
+            :perform_async,
             actor_class_name: actor_class_name,
             result_key: result_key,
             index: index,
@@ -15,10 +16,7 @@ module ParallelWorkforce
       end
 
       def perform(args)
-        args.symbolize_keys!
-        Time.use_zone(args.delete(:time_zone_name)) do
-          ParallelWorkforce::Job::Util::Performer.new(**args).perform
-        end
+        invoke_performer_with_time_zone_name(args)
       end
     end
   end

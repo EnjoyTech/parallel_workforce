@@ -37,31 +37,11 @@ module ParallelWorkforce::Job
     end
 
     describe '.enqueue_actor' do
-      subject do
-        described_class.enqueue_actor(args)
-      end
-
-      it 'enqueues job' do
-        expect(described_class).to receive(:perform_later).with(
-          actor_class_name: actor_class_name,
-          result_key: result_key,
-          index: index,
-          server_revision: server_revision,
-          serialized_actor_args: serialized_actor_args,
-        ).and_call_original
-
-        subject
-      end
+      it_behaves_like 'enqueue_actor', :perform_later
     end
 
     describe '#perform' do
-      subject do
-        described_class.new.perform(args)
-      end
-
-      it 'performs actor' do
-        expect(subject).to eq(serialized_value: ParallelWorkforce.configuration.serializer.serialize(value))
-      end
+      it_behaves_like 'perform', :perform_later
     end
   end
 end

@@ -20,6 +20,7 @@ module ParallelWorkforce::Job
     let(:index) { 0 }
     let(:server_revision) { nil }
     let(:serialized_actor_args) { ParallelWorkforce.configuration.serializer.serialize(value: value) }
+    let(:serializer) { nil }
     let(:args) do
       {
         actor_class_name: actor_class_name,
@@ -33,34 +34,32 @@ module ParallelWorkforce::Job
     before do
       ParallelWorkforce.configure do |configuration|
         configuration.revision_builder = nil
+        configuration.serializer = serializer if serializer
       end
     end
 
+    shared_context 'with Marshal serializer and invalid UTF-8 sequence' do
+      let(:serializer) { ParallelWorkforce::Serializer::Marshal.new }
+      let(:value) { "a value with invalid UTF-8 sequence: \x97" }
+    end
+
     describe '.enqueue_actor' do
-      subject do
-        described_class.enqueue_actor(args)
-      end
+      it_behaves_like 'enqueue_actor', :perform_async
 
-      it 'enqueues job' do
-        expect(described_class).to receive(:perform_async).with(
-          actor_class_name: actor_class_name,
-          result_key: result_key,
-          index: index,
-          server_revision: server_revision,
-          serialized_actor_args: serialized_actor_args,
-        ).and_call_original
+      context 'with Marshal serializer and invalid UTF-8 sequence' do
+        include_context 'with Marshal serializer and invalid UTF-8 sequence'
 
-        subject
+        it_behaves_like 'enqueue_actor', :perform_async
       end
     end
 
     describe '#perform' do
-      subject do
-        described_class.new.perform(args)
-      end
+      include_examples 'perform', :perform_async
 
-      it 'performs actor' do
-        expect(subject).to eq(serialized_value: ParallelWorkforce.configuration.serializer.serialize(value))
+      context 'with Marshal serializer and invalid UTF-8 sequence' do
+        include_context 'with Marshal serializer and invalid UTF-8 sequence'
+
+        include_examples 'perform', :perform_async
       end
     end
   end

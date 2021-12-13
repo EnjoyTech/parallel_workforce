@@ -42,6 +42,9 @@ RSpec/DescribedClass:
 # RSpec/VerifiedDoubles:
 #   Enabled: true
 
+Layout/FirstParameterIndentation:
+  Enabled: false
+
 Layout/AlignHash:
   Enabled: false
 
@@ -134,15 +137,6 @@ Style/GuardClause:
 # disabled per group consensus
 Style/IfUnlessModifier:
   Enabled: false
-
-Layout/IndentFirstArgument:
-  Enabled: false
-
-Naming/RescuedExceptionsVariableName:
-  Enabled: false
-
-Layout/IndentFirstArrayElement:
-  EnforcedStyle: consistent
 
 Layout/MultilineOperationIndentation:
   Enabled: true
