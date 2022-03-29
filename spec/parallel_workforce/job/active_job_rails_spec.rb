@@ -3,6 +3,7 @@ require 'spec_helper'
 module ParallelWorkforce::Job
   describe ActiveJobRails do
     time_zone_name = 'Pacific Time (US & Canada)'
+    locale = :en
 
     class ActiveJobRailsTestActor
       def initialize(value:)
@@ -14,10 +15,10 @@ module ParallelWorkforce::Job
       end
     end
 
-    let(:time_zone_name) { time_zone_name }
     let(:value) do
       {
         time_zone_name: Time.zone.name,
+        locale: I18n.locale,
         value: @value,
       }
     end
@@ -45,11 +46,11 @@ module ParallelWorkforce::Job
     end
 
     describe '.enqueue_actor' do
-      it_behaves_like 'enqueue_actor', :perform_later, time_zone_name
+      it_behaves_like 'enqueue_actor', :perform_later, time_zone_name, locale
     end
 
     describe '#perform' do
-      it_behaves_like 'perform', :perform_later, time_zone_name
+      it_behaves_like 'perform', :perform_later, time_zone_name, locale
     end
   end
 end

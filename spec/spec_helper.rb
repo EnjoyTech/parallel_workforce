@@ -105,10 +105,12 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 end
 
-RSpec.shared_examples 'enqueue_actor' do |job_method, time_zone_name=nil|
+RSpec.shared_examples 'enqueue_actor' do |job_method, time_zone_name=nil, locale=nil|
   subject do
     Time.use_zone(time_zone_name) do
-      described_class.enqueue_actor(args)
+      I18n.with_locale(locale) do
+        described_class.enqueue_actor(args)
+      end
     end
   end
 
@@ -121,6 +123,7 @@ RSpec.shared_examples 'enqueue_actor' do |job_method, time_zone_name=nil|
         server_revision: server_revision,
       }.tap do |args|
         args[:time_zone_name] = time_zone_name if time_zone_name
+        args[:locale] = locale.to_s if locale
       end,
     )
 
@@ -128,28 +131,33 @@ RSpec.shared_examples 'enqueue_actor' do |job_method, time_zone_name=nil|
   end
 end
 
-RSpec.shared_examples 'perform' do |job_method, time_zone_name=nil|
+RSpec.shared_examples 'perform' do |job_method, time_zone_name=nil, locale=nil|
   let(:execution_time) { Time.now }
 
   subject do
     Time.use_zone(time_zone_name) do
-      # do not allow to actually enqueue job
-      expect(described_class).to receive(job_method)
+      I18n.with_locale(locale) do
+        # do not allow to actually enqueue job
+        expect(described_class).to receive(job_method)
 
-      described_class.enqueue_actor(args)
+        described_class.enqueue_actor(args)
 
-      perform_args = args.dup
-      perform_args[:time_zone_name] = time_zone_name if time_zone_name
+        perform_args = args.dup
+        perform_args[:time_zone_name] = time_zone_name if time_zone_name
+        perform_args[:locale] = locale.to_s if locale
 
-      Timecop.travel(execution_time) do
-        described_class.new.perform(perform_args)
+        Timecop.travel(execution_time) do
+          described_class.new.perform(perform_args)
+        end
       end
     end
   end
 
   it 'performs actor' do
     Time.use_zone(time_zone_name) do
-      expect(subject).to eq(serialized_value: ParallelWorkforce.configuration.serializer.serialize(value))
+      I18n.with_locale(locale) do
+        expect(subject).to eq(serialized_value: ParallelWorkforce.configuration.serializer.serialize(value))
+      end
     end
   end
 

@@ -47,11 +47,13 @@ module ParallelWorkforce
           ParallelWorkforce::Job::Util::Performer.new(**args).perform
         end
 
-        def invoke_performer_with_time_zone_name(args)
+        def invoke_performer_with_time_zone_name_and_locale(args)
           args.transform_keys!(&:to_sym)
 
           Time.use_zone(args.delete(:time_zone_name)) do
-            invoke_performer(args)
+            I18n.with_locale(args.delete(:locale)) do
+              invoke_performer(args)
+            end
           end
         end
       end

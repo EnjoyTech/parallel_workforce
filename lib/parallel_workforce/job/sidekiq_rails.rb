@@ -11,12 +11,13 @@ module ParallelWorkforce
             server_revision: server_revision,
             serialized_actor_args: serialized_actor_args,
             time_zone_name: Time.zone.name,
+            locale: I18n.locale&.to_s,
           )
         end
       end
 
       def perform(args)
-        invoke_performer_with_time_zone_name(args)
+        invoke_performer_with_time_zone_name_and_locale(args)
       end
     end
   end
